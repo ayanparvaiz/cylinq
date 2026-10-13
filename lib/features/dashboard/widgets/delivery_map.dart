@@ -24,7 +24,6 @@ class DeliveryMap extends StatelessWidget {
     ];
     if (points.isEmpty) return const SizedBox.shrink();
     final max = points.map((p) => p.$2).reduce(math.max);
-    final surface = Theme.of(context).colorScheme.surfaceContainerLow;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
@@ -53,7 +52,7 @@ class DeliveryMap extends StatelessWidget {
               markers: [
                 // Smallest first so big circles never hide small ones' hit areas.
                 for (final (point, n) in [...points]..sort((a, b) => a.$2.compareTo(b.$2)))
-                  _marker(point, n, max, surface),
+                  _marker(point, n, max),
               ],
             ),
             const RichAttributionWidget(
@@ -65,7 +64,7 @@ class DeliveryMap extends StatelessWidget {
     );
   }
 
-  Marker _marker(LatLng point, int n, int max, Color surface) {
+  Marker _marker(LatLng point, int n, int max) {
     final t = math.sqrt(n / max); // area, not radius, tracks the count
     final size = 14 + 34 * t;
     return Marker(
@@ -81,7 +80,9 @@ class DeliveryMap extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.flame.withValues(alpha: 0.35 + 0.5 * t),
-              border: Border.all(color: surface, width: 2),
+              // The ring separates overlapping circles. OSM tiles are light in
+              // both themes, so it is white rather than the app surface.
+              border: Border.all(color: Colors.white, width: 2),
             ),
           ),
         ),
