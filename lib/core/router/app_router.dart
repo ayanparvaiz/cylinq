@@ -4,10 +4,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
+import '../../features/customers/presentation/customer_detail_screen.dart';
+import '../../features/customers/presentation/customers_screen.dart';
+import '../../features/cylinders/presentation/cylinder_detail_screen.dart';
+import '../../features/cylinders/presentation/cylinders_screen.dart';
+import '../../features/delivery/presentation/deliver_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/labels/presentation/labels_screen.dart';
 import '../../features/onboarding/presentation/no_access_screen.dart';
 import '../../features/onboarding/presentation/setup_business_screen.dart';
+import '../../features/scan/presentation/scan_screen.dart';
 import '../../features/session/session.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/shell/app_shell.dart';
@@ -40,6 +46,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) => AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
+          GoRoute(path: AppRoutes.scan, builder: (_, _) => const ScanScreen()),
+          GoRoute(
+            path: AppRoutes.deliver,
+            builder: (_, state) => DeliverScreen(customerId: state.uri.queryParameters['customer']),
+          ),
+          GoRoute(
+            path: AppRoutes.cylinders,
+            builder: (_, _) => const CylindersScreen(),
+            routes: [
+              GoRoute(
+                path: ':serial',
+                builder: (_, state) => CylinderDetailScreen(serial: state.pathParameters['serial']!),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: AppRoutes.customers,
+            builder: (_, _) => const CustomersScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (_, state) => CustomerDetailScreen(id: state.pathParameters['id']!),
+              ),
+            ],
+          ),
           GoRoute(path: AppRoutes.labels, builder: (_, _) => const LabelsScreen()),
           GoRoute(path: AppRoutes.staff, builder: (_, _) => const StaffScreen()),
           GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsScreen()),
