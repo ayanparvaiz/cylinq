@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/labels/presentation/labels_screen.dart';
 import '../../features/onboarding/presentation/no_access_screen.dart';
 import '../../features/onboarding/presentation/setup_business_screen.dart';
 import '../../features/session/session.dart';
@@ -39,6 +40,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) => AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
+          GoRoute(path: AppRoutes.labels, builder: (_, _) => const LabelsScreen()),
           GoRoute(path: AppRoutes.staff, builder: (_, _) => const StaffScreen()),
           GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsScreen()),
         ],
