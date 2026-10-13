@@ -75,7 +75,8 @@ class _LabelsScreenState extends ConsumerState<LabelsScreen> {
   Widget build(BuildContext context) {
     final org = ref.watch(sessionProvider).org;
     final types = ref.watch(typesProvider).value ?? const [];
-    _typeId ??= types.isEmpty ? null : types.first.id;
+    // Default to the 14.2 kg domestic size, the one most agencies label first.
+    _typeId ??= types.isEmpty ? null : (types.where((t) => t.weightKg == 14.2).firstOrNull ?? types.first).id;
     final count = int.tryParse(_count.text) ?? 0;
     final text = Theme.of(context).textTheme;
 
@@ -122,8 +123,8 @@ class _LabelsScreenState extends ConsumerState<LabelsScreen> {
                   const SizedBox(height: 14),
                   SegmentedButton<bool>(
                     segments: const [
-                      ButtonSegment(value: false, label: Text('Empty now'), icon: Icon(Icons.circle_outlined)),
-                      ButtonSegment(value: true, label: Text('Full now'), icon: Icon(Icons.circle)),
+                      ButtonSegment(value: false, label: Text('Empty now')),
+                      ButtonSegment(value: true, label: Text('Full now')),
                     ],
                     selected: {_filled},
                     onSelectionChanged: (s) => setState(() => _filled = s.first),
