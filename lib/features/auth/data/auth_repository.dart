@@ -26,6 +26,7 @@ class AuthRepository {
       password: password,
     );
     await cred.user?.updateDisplayName(name.trim());
+    await cred.user?.reload();
   }
 
   Future<void> sendPasswordReset(String email) =>

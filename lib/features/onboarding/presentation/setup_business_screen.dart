@@ -15,6 +15,9 @@ class SetupBusinessScreen extends ConsumerStatefulWidget {
 
 class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
   final _form = GlobalKey<FormState>();
+  // Sign-up stores the name on the auth profile; the cached user object may
+  // not have it yet, so it is shown here to confirm or fill in.
+  late final _name = TextEditingController(text: ref.read(firebaseAuthProvider).currentUser?.displayName);
   final _business = TextEditingController();
   final _prefix = TextEditingController();
   final _phone = TextEditingController();
@@ -24,6 +27,7 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
 
   @override
   void dispose() {
+    _name.dispose();
     _business.dispose();
     _prefix.dispose();
     _phone.dispose();
@@ -41,7 +45,7 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
       final user = state.user;
       await ref.read(onboardingRepositoryProvider).createBusiness(
         owner: user,
-        ownerName: user.displayName ?? user.email?.split('@').first ?? 'Owner',
+        ownerName: _name.text,
         businessName: _business.text,
         labelPrefix: _prefix.text,
         phone: _phone.text,
@@ -65,6 +69,13 @@ class _SetupBusinessScreenState extends ConsumerState<SetupBusinessScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              TextFormField(
+                controller: _name,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Your name', prefixIcon: Icon(Icons.person_outline)),
+                validator: (v) => v != null && v.trim().isNotEmpty ? null : 'Enter your name',
+              ),
+              const SizedBox(height: 14),
               TextFormField(
                 controller: _business,
                 textCapitalization: TextCapitalization.words,
