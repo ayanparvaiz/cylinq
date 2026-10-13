@@ -20,51 +20,58 @@ class DeliveryMap extends StatelessWidget {
   Widget build(BuildContext context) {
     final points = <(LatLng, int)>[
       for (final e in cells.entries)
-        if (Geohash.decode(e.key) case (final lat, final lng)) (LatLng(lat, lng), e.value),
+        if (Geohash.decode(e.key) case (final lat, final lng))
+          (LatLng(lat, lng), e.value),
     ];
     if (points.isEmpty) return const SizedBox.shrink();
     final max = points.map((p) => p.$2).reduce(math.max);
 
+    // On a phone the map is a static overview. flutter_map's recognisers claim
+    // one-finger drags even with interaction off, which would stop the
+    // dashboard from scrolling under the thumb.
+    final phone = MediaQuery.sizeOf(context).width < 600;
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: SizedBox(
         height: height,
-        child: FlutterMap(
-          options: MapOptions(
-            initialCenter: points.first.$1,
-            initialZoom: 13,
-            initialCameraFit: points.length > 1
-                ? CameraFit.coordinates(
-                    coordinates: [for (final p in points) p.$1],
-                    padding: const EdgeInsets.all(48),
-                    maxZoom: 15,
-                  )
-                : null,
-            // On a phone a one-finger drag must scroll the page, not pan the
-            // map, or the dashboard traps the thumb. Pinch still zooms.
-            interactionOptions: InteractionOptions(
-              flags: MediaQuery.sizeOf(context).width < 600
-                  ? InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom
-                  : InteractiveFlag.all & ~InteractiveFlag.rotate,
+        child: IgnorePointer(
+          ignoring: phone,
+          child: FlutterMap(
+            options: MapOptions(
+              initialCenter: points.first.$1,
+              initialZoom: 13,
+              initialCameraFit: points.length > 1
+                  ? CameraFit.coordinates(
+                      coordinates: [for (final p in points) p.$1],
+                      padding: const EdgeInsets.all(48),
+                      maxZoom: 15,
+                    )
+                  : null,
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+              ),
             ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.cylinq.app',
+                maxZoom: 19,
+              ),
+              MarkerLayer(
+                markers: [
+                  // Smallest first so big circles never hide small ones' hit areas.
+                  for (final (point, n) in [
+                    ...points,
+                  ]..sort((a, b) => a.$2.compareTo(b.$2)))
+                    _marker(point, n, max),
+                ],
+              ),
+              // Always visible, so the credit OSM asks for needs no tap.
+              const SimpleAttributionWidget(
+                source: Text('OpenStreetMap contributors'),
+              ),
+            ],
           ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.cylinq.app',
-              maxZoom: 19,
-            ),
-            MarkerLayer(
-              markers: [
-                // Smallest first so big circles never hide small ones' hit areas.
-                for (final (point, n) in [...points]..sort((a, b) => a.$2.compareTo(b.$2)))
-                  _marker(point, n, max),
-              ],
-            ),
-            const RichAttributionWidget(
-              attributions: [TextSourceAttribution('OpenStreetMap contributors')],
-            ),
-          ],
         ),
       ),
     );
