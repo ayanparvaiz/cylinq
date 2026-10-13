@@ -69,3 +69,23 @@ Statuses: `empty`, `full`, `vehicle`, `customer`, `lost`, `retired`.
 - Staff (phone): bottom navigation, one big **Scan** action.
 - Admin (web): sidebar with Dashboard, Cylinders, Labels, Customers, Areas, Staff.
 - Status colours: full green, empty grey, vehicle blue, customer orange, lost red.
+
+## Status (13 Oct 2026)
+
+Phases 0–6 are done and live at https://cylinq.web.app.
+
+- Security rules: 24 emulator tests, including a replay of every write the app
+  makes. CI runs them on each push.
+- Verified end to end on the live project: sign-up, business setup, labels,
+  fill, load, delivery with GPS, dashboard and map.
+- Android release APK builds (debug-signed for now).
+
+## Next
+
+- **Close sign-up for a single client.** Anyone can create a business on this
+  deployment today. For one client, allow-list their owner in the rules.
+- **Release signing** for the Play Store, and a launcher icon.
+- **Delivery proof photo**, compressed to ≤ 60 KB and stored in Firestore
+  (Cloud Storage needs billing).
+- **Customer QR cards** so staff scan the customer instead of searching.
+- **CSV export** of sales for the accountant.
