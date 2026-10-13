@@ -15,7 +15,10 @@ import 'scanner_panel.dart';
 /// Godown and vehicle work: fill, load, return. Deliveries have their own
 /// screen because they also need a customer and money.
 class ScanScreen extends ConsumerStatefulWidget {
-  const ScanScreen({super.key});
+  const ScanScreen({super.key, this.initialMode = ScanMode.lookup});
+
+  /// Set from `/scan?mode=load` so a shortcut can open straight into a job.
+  final ScanMode initialMode;
 
   @override
   ConsumerState<ScanScreen> createState() => _ScanScreenState();
@@ -24,7 +27,7 @@ class ScanScreen extends ConsumerStatefulWidget {
 class _ScanScreenState extends ConsumerState<ScanScreen> {
   static const _modes = [ScanMode.lookup, ScanMode.fill, ScanMode.load, ScanMode.returned];
 
-  ScanMode _mode = ScanMode.lookup;
+  late ScanMode _mode = _modes.contains(widget.initialMode) ? widget.initialMode : ScanMode.lookup;
   final _items = <ScannedItem>[];
   bool _busy = false;
 

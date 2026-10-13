@@ -10,6 +10,7 @@ import '../../features/cylinders/presentation/cylinder_detail_screen.dart';
 import '../../features/cylinders/presentation/cylinders_screen.dart';
 import '../../features/delivery/presentation/deliver_screen.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/moves/move_rules.dart';
 import '../../features/labels/presentation/labels_screen.dart';
 import '../../features/onboarding/presentation/no_access_screen.dart';
 import '../../features/onboarding/presentation/setup_business_screen.dart';
@@ -46,7 +47,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) => AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
-          GoRoute(path: AppRoutes.scan, builder: (_, _) => const ScanScreen()),
+          GoRoute(
+            path: AppRoutes.scan,
+            builder: (_, state) => ScanScreen(
+              initialMode: ScanMode.values.asNameMap()[state.uri.queryParameters['mode']] ?? ScanMode.lookup,
+            ),
+          ),
           GoRoute(
             path: AppRoutes.deliver,
             builder: (_, state) => DeliverScreen(customerId: state.uri.queryParameters['customer']),
