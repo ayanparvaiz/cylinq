@@ -40,7 +40,13 @@ class DeliveryMap extends StatelessWidget {
                     maxZoom: 15,
                   )
                 : null,
-            interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+            // On a phone a one-finger drag must scroll the page, not pan the
+            // map, or the dashboard traps the thumb. Pinch still zooms.
+            interactionOptions: InteractionOptions(
+              flags: MediaQuery.sizeOf(context).width < 600
+                  ? InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom
+                  : InteractiveFlag.all & ~InteractiveFlag.rotate,
+            ),
           ),
           children: [
             TileLayer(
