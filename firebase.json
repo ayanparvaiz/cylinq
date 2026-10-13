@@ -1,1 +1,53 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"ticcoins-605ec","appId":"1:955812675702:android:308d10ec804ed3b4785f57","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"ticcoins-605ec","configurations":{"android":"1:955812675702:android:308d10ec804ed3b4785f57","web":"1:955812675702:web:1623dc9188820fa7785f57"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "site": "cylinq",
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": false
+    },
+    "singleProjectMode": true
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "ticcoins-605ec",
+          "appId": "1:955812675702:android:308d10ec804ed3b4785f57",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "ticcoins-605ec",
+          "configurations": {
+            "android": "1:955812675702:android:308d10ec804ed3b4785f57",
+            "web": "1:955812675702:web:1623dc9188820fa7785f57"
+          }
+        }
+      }
+    }
+  }
+}
