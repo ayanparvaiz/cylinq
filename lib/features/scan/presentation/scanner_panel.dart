@@ -68,16 +68,15 @@ class _ScannerPanelState extends State<ScannerPanel> {
                 controller: _controller,
                 onDetect: _onDetect,
                 errorBuilder: (context, error) => _CameraError(onType: _typeSerial),
-              ),
-            ),
-            IgnorePointer(
-              child: Center(
-                child: Container(
-                  width: widget.height * 0.62,
-                  height: widget.height * 0.62,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.flame, width: 3),
-                    borderRadius: BorderRadius.circular(18),
+                // Only drawn over a working camera, never over the error text.
+                overlayBuilder: (context, box) => Center(
+                  child: Container(
+                    width: box.maxHeight * 0.62,
+                    height: box.maxHeight * 0.62,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.flame, width: 3),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                   ),
                 ),
               ),
