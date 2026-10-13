@@ -1,0 +1,13 @@
+{
+  "name": "cylinq-rules-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-concurrency=1",
+    "emulate": "cd ../.. && firebase emulators:exec --only firestore --project demo-cylinq \"npm --prefix tests/rules test\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase": "^13.0.0"
+  }
+}
