@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "955812675702",
+    "project_id": "ticcoins-605ec",
+    "storage_bucket": "ticcoins-605ec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955812675702:android:308d10ec804ed3b4785f57",
+        "android_client_info": {
+          "package_name": "com.cylinq.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "955812675702-instce7jvplmdn4t6o3r689gikgg4smp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWZtcgnGENI_qR8SyqULaiURrsVDlopcU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "955812675702-instce7jvplmdn4t6o3r689gikgg4smp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "955812675702-p9ikjlp1snaleoa831mef77cnuhrh7tf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ticcoins"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955812675702:android:f2a29c99c7ea1bf4785f57",
+        "android_client_info": {
+          "package_name": "com.example.ticcoins"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "955812675702-instce7jvplmdn4t6o3r689gikgg4smp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWZtcgnGENI_qR8SyqULaiURrsVDlopcU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "955812675702-instce7jvplmdn4t6o3r689gikgg4smp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "955812675702-p9ikjlp1snaleoa831mef77cnuhrh7tf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ticcoins"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
