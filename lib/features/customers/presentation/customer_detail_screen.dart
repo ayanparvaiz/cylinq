@@ -95,7 +95,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                             for (final cyl in list)
                               ListTile(
                                 title: Text(cyl.serial, style: const TextStyle(fontWeight: FontWeight.w700)),
-                                subtitle: Text('${cyl.typeName} · since ${since(cyl.lastEventAt)}'),
+                                subtitle: Text('${cyl.typeName} · delivered ${ago(cyl.lastEventAt)}'),
                                 trailing: StatusChip(cyl, dense: true),
                                 onTap: () => context.push(AppRoutes.cylinder(cyl.serial)),
                               ),

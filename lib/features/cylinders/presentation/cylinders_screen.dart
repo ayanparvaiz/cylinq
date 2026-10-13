@@ -108,7 +108,7 @@ class CylinderTile extends StatelessWidget {
         subtitle: Text([
           c.typeName,
           if (c.holderName != null) c.holderName!,
-          'since ${since(c.lastEventAt)}',
+          ago(c.lastEventAt),
         ].join(' · ')),
         trailing: StatusChip(c, dense: true),
       ),

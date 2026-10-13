@@ -83,7 +83,7 @@ class CylinderDetailScreen extends ConsumerWidget {
                           StatusChip(c),
                           const SizedBox(height: 10),
                           if (c.holderName != null) Text('With ${c.holderName}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                          Text('Since ${since(c.lastEventAt)} · ${dateTime(c.lastEventAt)}'),
+                          Text('Since ${dateTime(c.lastEventAt)} · ${since(c.lastEventAt)}'),
                           if (c.lastGeo != null)
                             Text('Last seen at ${c.lastGeo!.latitude.toStringAsFixed(5)}, ${c.lastGeo!.longitude.toStringAsFixed(5)}'),
                         ],
