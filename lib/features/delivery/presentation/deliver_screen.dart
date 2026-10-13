@@ -126,6 +126,10 @@ class _DeliverScreenState extends ConsumerState<DeliverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Keep prices loaded, and price anything scanned before they arrived.
+    ref.listen(typesProvider, (_, next) {
+      if (next.hasValue) setState(_recalcAmount);
+    });
     // Pre-select the customer when opened from their page.
     if (_customer == null && widget.customerId != null) {
       final all = ref.watch(customersProvider).value ?? const [];
