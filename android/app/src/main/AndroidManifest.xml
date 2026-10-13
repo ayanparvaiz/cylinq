@@ -1,4 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Firestore sync, map tiles and label fonts. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Scanning QR labels. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Tagging each delivery with where it happened. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <application
         android:label="CylinQ"
         android:name="${applicationName}"
