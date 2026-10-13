@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/location/device_location.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/models/customer.dart';
 import '../../../core/models/sales.dart';
 import '../../../core/utils/formatters.dart';
@@ -55,7 +56,11 @@ class _DeliverScreenState extends ConsumerState<DeliverScreen> {
     final types = ref.read(typesProvider).value ?? const [];
     final price = {for (final t in types) t.id: t.price};
     final sum = _given.fold<num>(0, (s, i) => s + (price[i.cylinder.typeId] ?? 0));
-    _amount.text = sum == sum.roundToDouble() ? '${sum.round()}' : sum.toStringAsFixed(2);
+    _amount.text = sum == 0
+        ? ''
+        : sum == sum.roundToDouble()
+        ? '${sum.round()}'
+        : sum.toStringAsFixed(2);
   }
 
   Future<void> _onCode(String raw) async {
@@ -109,7 +114,9 @@ class _DeliverScreenState extends ConsumerState<DeliverScreen> {
             ? 'Delivered to ${customer.name}${geo == null ? ' (no GPS)' : ''}'
             : 'Saved on this phone. It will sync when you are back online.',
       );
-      context.pop();
+      // Leave straight away so a second tap cannot save the same visit twice.
+      // Opened from a bookmark or QR link there is nothing to pop back to.
+      context.canPop() ? context.pop() : context.go(AppRoutes.home);
     } catch (e) {
       if (mounted) showMessage(context, 'Could not save: $e');
     } finally {
@@ -194,7 +201,7 @@ class _DeliverScreenState extends ConsumerState<DeliverScreen> {
             controller: _amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-            decoration: const InputDecoration(labelText: 'Amount', prefixText: '₹ '),
+            decoration: const InputDecoration(labelText: 'Amount', prefixText: '₹ ', hintText: '0'),
             onChanged: (_) => setState(() => _amountEdited = true),
           ),
           const SizedBox(height: 12),
