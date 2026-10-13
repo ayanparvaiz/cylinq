@@ -108,6 +108,8 @@ class AppShell extends ConsumerWidget {
   }
 
   static int _indexFor(String location, List<_Dest> dests) {
+    // A delivery is started from Scan, so Scan stays lit.
+    if (location.startsWith(AppRoutes.deliver)) location = AppRoutes.scan;
     for (var i = dests.length - 1; i >= 0; i--) {
       final p = dests[i].path;
       if (p == AppRoutes.home ? location == p : location.startsWith(p)) return i;
