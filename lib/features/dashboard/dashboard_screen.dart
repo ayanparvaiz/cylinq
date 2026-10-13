@@ -65,7 +65,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TileGrid(
-                  minWidth: 200,
+                  // Two tiles a row on a phone, four on a monitor.
+                  minWidth: wide ? 200 : 150,
                   children: [
                     StatTile(label: 'Revenue', value: rupees(s.amount), caption: _range.label, hero: true),
                     StatTile(label: 'Cylinders sold', value: count(s.qty), caption: _range.label),
