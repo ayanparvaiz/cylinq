@@ -1,12 +1,12 @@
 {
-    "name": "cylinq",
-    "short_name": "cylinq",
+    "name": "CylinQ",
+    "short_name": "CylinQ",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "CylinQ - track every gas cylinder and see sales by area",
-    "orientation": "portrait-primary",
+    "background_color": "#FFF8F3",
+    "theme_color": "#E8590C",
+    "description": "Track every gas cylinder with QR labels and see sales by area.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
