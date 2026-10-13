@@ -8,8 +8,10 @@ import '../../features/home/home_screen.dart';
 import '../../features/onboarding/presentation/no_access_screen.dart';
 import '../../features/onboarding/presentation/setup_business_screen.dart';
 import '../../features/session/session.dart';
+import '../../features/settings/settings_screen.dart';
 import '../../features/shell/app_shell.dart';
 import '../../features/shell/splash_screen.dart';
+import '../../features/staff/presentation/staff_screen.dart';
 import 'app_routes.dart';
 
 const _adminOnly = [AppRoutes.labels, AppRoutes.staff];
@@ -37,6 +39,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) => AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(path: AppRoutes.home, builder: (_, _) => const HomeScreen()),
+          GoRoute(path: AppRoutes.staff, builder: (_, _) => const StaffScreen()),
+          GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsScreen()),
         ],
       ),
     ],
