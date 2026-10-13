@@ -13,9 +13,14 @@ final authUserProvider = StreamProvider<User?>(
 final accountProvider = StreamProvider<Account?>((ref) {
   final user = ref.watch(authUserProvider).value;
   if (user == null) return Stream.value(null);
-  return OrgRefs.account(user.uid).snapshots().map(
-    (doc) => doc.exists ? Account.fromDoc(doc) : null,
-  );
+  // Skip snapshots that exist only in the local cache. Right after "Create
+  // business" the account shows up locally before the server has the batch,
+  // and listening to the membership then would be refused by the rules.
+  return OrgRefs.account(user.uid)
+      .snapshots(includeMetadataChanges: true)
+      .where((doc) => !doc.metadata.hasPendingWrites)
+      .map((doc) => doc.exists ? Account.fromDoc(doc) : null)
+      .distinct((a, b) => a?.orgId == b?.orgId && a?.role == b?.role);
 });
 
 final _memberProvider = StreamProvider<Member?>((ref) {
@@ -107,11 +112,21 @@ final sessionStateProvider = Provider<SessionState>((ref) {
 
 /// The session inside the signed-in shell. Only read it below the shell, where
 /// the router guarantees [Ready].
-final sessionProvider = Provider<Session>((ref) {
-  final state = ref.watch(sessionStateProvider);
-  if (state is Ready) return state.session;
-  throw StateError('No business session');
-});
+final sessionProvider = NotifierProvider<_SessionNotifier, Session>(_SessionNotifier.new);
+
+class _SessionNotifier extends Notifier<Session> {
+  Session? _last;
+
+  @override
+  Session build() {
+    final state = ref.watch(sessionStateProvider);
+    if (state is Ready) return _last = state.session;
+    if (state is SignedOut) _last = null;
+    // Mid-transition (a listener reconnecting): keep the last good session so
+    // pages in the shell do not crash in the frame before the router moves on.
+    return _last ?? (throw StateError('No business session'));
+  }
+}
 
 final orgRefsProvider = Provider<OrgRefs>(
   (ref) => OrgRefs(ref.watch(sessionProvider.select((s) => s.orgId))),
