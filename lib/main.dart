@@ -21,10 +21,10 @@ Future<void> main() async {
   );
   runApp(
     ProviderScope(
-      // Riverpod retries failed providers by default. A Firestore permission
-      // error will not fix itself, and retrying it only burns free-tier reads.
-      retry: (attempt, error) =>
-          error is FirebaseException || attempt >= 3 ? null : Duration(seconds: 1 << attempt),
+      // Riverpod retries failed providers forever by default. Two quick retries
+      // ride out a dropped connection; after that it is a real error (most
+      // often a permission one) and retrying would only burn free-tier reads.
+      retry: (attempt, error) => attempt >= 2 ? null : Duration(seconds: 1 << attempt),
       child: const CylinqApp(),
     ),
   );
