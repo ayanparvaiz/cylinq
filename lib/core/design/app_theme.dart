@@ -26,7 +26,11 @@ abstract final class AppTheme {
     );
 
     final base = ThemeData(colorScheme: scheme, useMaterial3: true);
-    final text = GoogleFonts.plusJakartaSansTextTheme(base.textTheme).apply(
+    // base.textTheme has colours but no sizes until Theme localises it, so the
+    // styles baked into component themes below (app bar title, nav labels)
+    // would fall back to 14px. Merge the Material geometry in first.
+    final sized = Typography.englishLike2021.merge(base.textTheme);
+    final text = GoogleFonts.plusJakartaSansTextTheme(sized).apply(
       bodyColor: isDark ? const Color(0xFFE6EAF2) : AppColors.ink,
       displayColor: isDark ? Colors.white : AppColors.ink,
     );
@@ -41,7 +45,7 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+        titleTextStyle: text.titleLarge?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.2),
       ),
       cardTheme: CardThemeData(
         color: scheme.surfaceContainerLow,
