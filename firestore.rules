@@ -1,0 +1,267 @@
+rules_version = '2';
+
+// CylinQ security rules.
+//
+// The project runs on the Spark plan, so there are no Cloud Functions: these
+// rules are the only server-side check. Instead of trusting the client, every
+// cylinder move must point at an event written in the same batch, and every
+// change to a daily total must point at a sale written in the same batch.
+// `at == request.time` proves the referenced doc was created by this request.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function orgPath(orgId) {
+      return /databases/$(database)/documents/orgs/$(orgId);
+    }
+
+    function memberPath(orgId, uid) {
+      return /databases/$(database)/documents/orgs/$(orgId)/members/$(uid);
+    }
+
+    function isMember(orgId) {
+      return signedIn()
+        && exists(memberPath(orgId, request.auth.uid))
+        && get(memberPath(orgId, request.auth.uid)).data.active == true;
+    }
+
+    function isAdmin(orgId) {
+      return isMember(orgId)
+        && get(memberPath(orgId, request.auth.uid)).data.role == 'admin';
+    }
+
+    function ownerOf(orgId) {
+      return get(orgPath(orgId)).data.ownerUid;
+    }
+
+    function statuses() {
+      return ['godown', 'vehicle', 'customer', 'lost', 'retired'];
+    }
+
+    function isNonEmptyString(v) {
+      return v is string && v.size() > 0 && v.size() <= 200;
+    }
+
+    // ---------- accounts: maps a signed-in user to their business ----------
+
+    match /accounts/{userId} {
+      allow read: if signedIn()
+        && (request.auth.uid == userId || isAdmin(resource.data.orgId));
+
+      // Either the user themself (right after their membership exists) or an
+      // admin of that business adding a staff member.
+      allow create: if signedIn()
+        && incoming().keys().hasOnly(['orgId', 'role', 'name', 'email', 'createdAt'])
+        && incoming().role in ['admin', 'staff']
+        && getAfter(memberPath(incoming().orgId, userId)).data.role == incoming().role
+        && (request.auth.uid == userId || isAdmin(incoming().orgId));
+
+      allow update: if isAdmin(existing().orgId)
+        && incoming().orgId == existing().orgId
+        && incoming().role in ['admin', 'staff'];
+
+      allow delete: if isAdmin(existing().orgId);
+    }
+
+    // ---------- a business ----------
+
+    match /orgs/{orgId} {
+      allow read: if isMember(orgId);
+
+      // One business per user: the creator must not have an account yet, and
+      // must create their account and admin membership in the same batch.
+      allow create: if signedIn()
+        && incoming().keys().hasOnly(['name', 'ownerUid', 'phone', 'address', 'labelPrefix', 'nextSerial', 'createdAt'])
+        && incoming().ownerUid == request.auth.uid
+        && isNonEmptyString(incoming().name)
+        && isNonEmptyString(incoming().labelPrefix)
+        && incoming().nextSerial == 1
+        && !exists(/databases/$(database)/documents/accounts/$(request.auth.uid))
+        && getAfter(/databases/$(database)/documents/accounts/$(request.auth.uid)).data.orgId == orgId;
+
+      allow update: if isAdmin(orgId)
+        && changedKeys().hasOnly(['name', 'phone', 'address', 'labelPrefix', 'nextSerial'])
+        && incoming().nextSerial >= existing().nextSerial;
+
+      allow delete: if false;
+
+      // ----- members -----
+
+      function validMember() {
+        return incoming().keys().hasOnly(['name', 'email', 'phone', 'role', 'active', 'createdAt'])
+          && isNonEmptyString(incoming().name)
+          && incoming().role in ['admin', 'staff']
+          && incoming().active is bool;
+      }
+
+      match /members/{memberId} {
+        allow read: if isMember(orgId);
+
+        allow create: if validMember() && (
+          isAdmin(orgId)
+          || (signedIn()
+              && memberId == request.auth.uid
+              && incoming().role == 'admin'
+              && !exists(orgPath(orgId))
+              && getAfter(orgPath(orgId)).data.ownerUid == request.auth.uid)
+        );
+
+        // The owner always stays an active admin.
+        allow update: if isAdmin(orgId)
+          && validMember()
+          && (memberId != ownerOf(orgId)
+              || (incoming().role == 'admin' && incoming().active == true));
+
+        allow delete: if isAdmin(orgId) && memberId != ownerOf(orgId);
+      }
+
+      // ----- cylinder types and areas: admin managed -----
+
+      match /types/{typeId} {
+        allow read: if isMember(orgId);
+        allow create, update: if isAdmin(orgId)
+          && incoming().keys().hasOnly(['name', 'weightKg', 'price', 'createdAt'])
+          && isNonEmptyString(incoming().name)
+          && incoming().weightKg is number
+          && incoming().price is number && incoming().price >= 0;
+        allow delete: if isAdmin(orgId);
+      }
+
+      match /areas/{areaId} {
+        allow read: if isMember(orgId);
+        allow create, update: if isAdmin(orgId)
+          && incoming().keys().hasOnly(['name', 'pincode', 'createdAt'])
+          && isNonEmptyString(incoming().name);
+        allow delete: if isAdmin(orgId);
+      }
+
+      // ----- customers: staff add them in the field -----
+
+      function validCustomer() {
+        return incoming().keys().hasOnly(['name', 'phone', 'address', 'areaId', 'areaName', 'geo',
+            'holding', 'totalQty', 'lastSaleAt', 'createdBy', 'createdAt', 'updatedAt'])
+          && isNonEmptyString(incoming().name)
+          && incoming().holding is int
+          && incoming().totalQty is int;
+      }
+
+      match /customers/{customerId} {
+        allow read: if isMember(orgId);
+        allow create: if isMember(orgId)
+          && validCustomer()
+          && incoming().createdBy == request.auth.uid;
+        allow update: if isMember(orgId)
+          && validCustomer()
+          && !changedKeys().hasAny(['createdBy', 'createdAt']);
+        allow delete: if isAdmin(orgId);
+      }
+
+      // ----- cylinders -----
+
+      function validCylinder(cylinderId) {
+        return incoming().keys().hasOnly(['serial', 'typeId', 'typeName', 'status', 'filled',
+            'holderId', 'holderName', 'areaId', 'lastGeo', 'lastEventId', 'lastEventAt', 'createdAt'])
+          && incoming().serial == cylinderId
+          && incoming().status in statuses()
+          && incoming().filled is bool;
+      }
+
+      // The move must be described by an event this same request created.
+      function movedByEvent(cylinderId) {
+        let e = getAfter(/databases/$(database)/documents/orgs/$(orgId)/events/$(incoming().lastEventId)).data;
+        return e.cylinderId == cylinderId
+          && e.by == request.auth.uid
+          && e.at == request.time
+          && e.to == incoming().status
+          && e.filled == incoming().filled;
+      }
+
+      match /cylinders/{cylinderId} {
+        allow read: if isMember(orgId);
+        allow create: if isAdmin(orgId) && validCylinder(cylinderId);
+        allow update: if validCylinder(cylinderId) && (
+          isAdmin(orgId)
+          || (isMember(orgId)
+              && changedKeys().hasOnly(['status', 'filled', 'holderId', 'holderName', 'areaId',
+                  'lastGeo', 'lastEventId', 'lastEventAt'])
+              && movedByEvent(cylinderId))
+        );
+        allow delete: if false;
+      }
+
+      // ----- events: immutable audit trail of cylinder moves -----
+
+      match /events/{eventId} {
+        allow read: if isMember(orgId);
+        allow create: if isMember(orgId)
+          && incoming().keys().hasOnly(['type', 'cylinderId', 'typeId', 'from', 'to', 'filled',
+              'by', 'byName', 'customerId', 'customerName', 'areaId', 'saleId', 'geo', 'note', 'at', 'day'])
+          && incoming().type in ['register', 'fill', 'load', 'deliver', 'collect', 'return',
+              'lost', 'found', 'retire', 'adjust']
+          && incoming().to in statuses()
+          && incoming().filled is bool
+          && incoming().by == request.auth.uid
+          && incoming().at == request.time
+          && (incoming().type in ['register', 'lost', 'found', 'retire', 'adjust']
+              ? isAdmin(orgId) : true);
+        allow update, delete: if false;
+      }
+
+      // ----- sales: one delivery visit, immutable -----
+
+      match /sales/{saleId} {
+        allow read: if isMember(orgId);
+        allow create: if isMember(orgId)
+          && incoming().keys().hasOnly(['customerId', 'customerName', 'areaId', 'areaName', 'given',
+              'taken', 'qty', 'amount', 'payment', 'geo', 'cell', 'by', 'byName', 'at', 'day'])
+          && incoming().by == request.auth.uid
+          && incoming().at == request.time
+          && incoming().given is list
+          && incoming().taken is list
+          && incoming().qty == incoming().given.size()
+          && incoming().amount is number && incoming().amount >= 0
+          && incoming().payment in ['cash', 'upi', 'credit']
+          && incoming().day is string;
+        allow update, delete: if false;
+      }
+
+      // ----- daily totals: only grow by exactly one new sale -----
+
+      function backedBySale(day) {
+        let s = getAfter(/databases/$(database)/documents/orgs/$(orgId)/sales/$(incoming().lastSaleId)).data;
+        let before = resource == null ? {'sales': 0, 'qty': 0, 'amount': 0} : resource.data;
+        return incoming().keys().hasOnly(['day', 'sales', 'qty', 'amount', 'areas', 'cells', 'lastSaleId', 'updatedAt'])
+          && incoming().day == day
+          && s.by == request.auth.uid
+          && s.at == request.time
+          && s.day == day
+          && incoming().sales == before.sales + 1
+          && incoming().qty == before.qty + s.qty
+          && incoming().amount == before.amount + s.amount;
+      }
+
+      match /daily/{day} {
+        allow read: if isMember(orgId);
+        allow create, update: if isMember(orgId) && backedBySale(day);
+        allow delete: if false;
+      }
+    }
+  }
+}
