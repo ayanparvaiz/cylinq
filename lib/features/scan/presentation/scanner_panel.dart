@@ -72,10 +72,12 @@ class _ScannerPanelState extends State<ScannerPanel> {
                 onDetect: _onDetect,
                 errorBuilder: (context, error) => _CameraError(onType: _typeSerial),
                 // Only drawn over a working camera, never over the error text.
-                overlayBuilder: (context, box) => Center(
+                // Nudged up so it clears the torch and Type buttons on phones.
+                overlayBuilder: (context, box) => Align(
+                  alignment: const Alignment(0, -0.35),
                   child: Container(
-                    width: box.maxHeight * 0.62,
-                    height: box.maxHeight * 0.62,
+                    width: box.maxHeight * 0.55,
+                    height: box.maxHeight * 0.55,
                     decoration: BoxDecoration(
                       border: Border.all(color: AppColors.flame, width: 3),
                       borderRadius: BorderRadius.circular(18),
