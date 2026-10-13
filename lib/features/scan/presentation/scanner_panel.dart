@@ -33,11 +33,14 @@ class _ScannerPanelState extends State<ScannerPanel> {
     for (final code in capture.barcodes) {
       final raw = code.rawValue;
       if (raw == null) continue;
-      // The camera sees the same label many times a second; report it once.
+      // The camera sees the same label many times a second. Report it once,
+      // and again only after it has been out of view for a few seconds, so a
+      // label held in front of the lens does not repeat every few seconds.
       final now = DateTime.now();
-      if (raw == _last && now.difference(_lastAt) < const Duration(seconds: 3)) continue;
+      final seenRecently = raw == _last && now.difference(_lastAt) < const Duration(seconds: 3);
       _last = raw;
       _lastAt = now;
+      if (seenRecently) continue;
       HapticFeedback.mediumImpact();
       widget.onCode(raw);
     }
