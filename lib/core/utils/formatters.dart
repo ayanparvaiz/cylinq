@@ -30,3 +30,9 @@ String since(DateTime? date, {DateTime? now}) {
   if (days < 60) return '$days day${days == 1 ? '' : 's'}';
   return '${days ~/ 30} months';
 }
+
+/// "today", "3 days ago", "2 months ago".
+String ago(DateTime? date, {DateTime? now}) {
+  final s = since(date, now: now);
+  return s == 'today' || s == '—' ? s : '$s ago';
+}

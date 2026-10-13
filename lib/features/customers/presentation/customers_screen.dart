@@ -97,7 +97,7 @@ class CustomerTile extends StatelessWidget {
         subtitle: Text([
           if (c.areaName.isNotEmpty) c.areaName,
           if (c.phone.isNotEmpty) c.phone,
-          if (c.lastSaleAt != null) 'last ${since(c.lastSaleAt)} ago',
+          if (c.lastSaleAt != null) 'last delivery ${ago(c.lastSaleAt)}',
         ].join(' · ')),
         trailing: trailing ??
             (c.holding > 0
