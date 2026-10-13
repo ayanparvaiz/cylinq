@@ -4,7 +4,9 @@ Track every gas cylinder with a QR label, and see where your sales happen.
 
 **Live:** https://cylinq.web.app
 
-![Owner dashboard](docs/screenshots/dashboard.png)
+![CylinQ](portfolio/cover.png)
+
+Screens, design notes and engineering write-up: [portfolio/README.md](portfolio/README.md).
 
 ## What it does
 
@@ -25,9 +27,11 @@ Track every gas cylinder with a QR label, and see where your sales happen.
 - **Works offline.** Scans and deliveries are cached on the phone and sync when
   signal returns.
 
-| Labels | Cylinder history | Delivery |
+![A delivery round on the staff app](portfolio/mobile-flow.png)
+
+| Dashboard | Label sheet | Cylinder history |
 |---|---|---|
-| ![Labels](docs/screenshots/labels.png) | ![History](docs/screenshots/cylinder.png) | ![Delivery](docs/screenshots/delivery.png) |
+| ![Dashboard](portfolio/screenshots/desktop/02-dashboard.png) | ![Labels](portfolio/screenshots/desktop/07-label-sheet.png) | ![History](portfolio/screenshots/desktop/05-cylinder-history.png) |
 
 ## Zero running cost
 
